@@ -288,16 +288,3 @@ The project follows Python best practices:
 2. **Upload failures**: Check `MAX_UPLOAD_SIZE` setting and file permissions
 3. **API key errors**: Verify your Mistral API key is valid and has credits
 4. **Import errors**: Ensure all dependencies are installed correctly
-
-## License
-
-[Add your license here]
-
-## Contributing
-
-[Add contribution guidelines here]
-
-## Contact
-
-[Add contact information here]
-
