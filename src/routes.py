@@ -1,12 +1,11 @@
-from typing import Dict, Annotated
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from typing import Annotated, Dict
 
-from protocols import PDFProcessorProtocol, VectorStoreProtocol, RAGServiceProtocol
-from schemas import UploadResponse, RAGResponse, QueryRequest, StatsResponse
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+
+from protocols import PDFProcessorProtocol, RAGServiceProtocol, VectorStoreProtocol
+from schemas import QueryRequest, RAGResponse, StatsResponse, UploadResponse
 from src.config import settings
-from src.pdf_processor import get_pdf_processor
-from src.vector_store import get_vector_store
-from src.rag_service import get_rag_service
+from src.dependencies import get_pdf_processor, get_rag_service, get_vector_store
 
 router = APIRouter()
 

@@ -105,20 +105,3 @@ class VectorStore:
         self.collection = self.client.get_or_create_collection(
             name=settings.chroma_collection_name,
         )
-
-
-# Singleton instance
-_vector_store_instance = None
-
-
-def get_vector_store() -> VectorStore:
-    """
-    Get or create the singleton VectorStore instance.
-
-    Returns:
-        VectorStore instance
-    """
-    global _vector_store_instance
-    if _vector_store_instance is None:
-        _vector_store_instance = VectorStore()
-    return _vector_store_instance

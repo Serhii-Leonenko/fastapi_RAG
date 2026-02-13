@@ -120,13 +120,3 @@ class PDFProcessor:
         """
         if os.path.exists(file_path):
             os.remove(file_path)
-
-
-_pdf_processor_instance = None
-
-
-def get_pdf_processor() -> PDFProcessor:
-    global _pdf_processor_instance
-    if _pdf_processor_instance is None:
-        _pdf_processor_instance = PDFProcessor()
-    return _pdf_processor_instance

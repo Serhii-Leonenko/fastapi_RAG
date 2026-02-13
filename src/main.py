@@ -1,24 +1,29 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from pdf_processor import get_pdf_processor
-from rag_service import get_rag_service
+from fastapi import FastAPI
+
 from src.config import settings
+from src.pdf_processor import PDFProcessor
+from src.rag_service import RAGService
 from src.routes import router
-from vector_store import get_vector_store
+from src.vector_store import VectorStore
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for FastAPI application.
+    Initializes services on startup and stores them in app.state.
+    """
     print(f"Starting {settings.app_name} v{settings.app_version}")
     print(f"Mistral model: {settings.mistral_model}")
     print(f"ChromaDB persist directory: {settings.chroma_persist_directory}")
 
     print("Initializing services...")
-    get_pdf_processor()
-    get_vector_store()
-    get_rag_service()
-    print("Services initialized.")
+    app.state.pdf_processor = PDFProcessor()
+    app.state.vector_store = VectorStore()
+    app.state.rag_service = RAGService(vector_store=app.state.vector_store)
+    print("Services initialized and stored in app.state")
 
     yield
 

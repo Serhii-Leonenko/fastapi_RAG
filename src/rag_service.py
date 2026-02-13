@@ -8,7 +8,6 @@ from pydantic_ai.providers.mistral import MistralProvider
 from protocols import VectorStoreProtocol
 from schemas import RAGResponse
 from src.config import settings
-from src.vector_store import get_vector_store
 
 
 class RAGService:
@@ -111,21 +110,3 @@ class RAGService:
         result = await self.agent.run(prompt)
 
         return result.output
-
-
-# Singleton instance
-_rag_service_instance = None
-
-
-def get_rag_service() -> RAGService:
-    """
-    Get or create the singleton RAGService instance.
-
-    Returns:
-        RAGService instance
-    """
-    global _rag_service_instance
-    if _rag_service_instance is None:
-        vector_store = get_vector_store()
-        _rag_service_instance = RAGService(vector_store)
-    return _rag_service_instance
