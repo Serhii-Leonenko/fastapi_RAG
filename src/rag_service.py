@@ -1,6 +1,8 @@
 from typing import Any
 
 import logfire
+from google import genai
+from google.genai import types
 from pydantic_ai import Agent
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
@@ -16,7 +18,7 @@ class RAGService:
     def __init__(self, vector_store: VectorStoreProtocol):
         self.vector_store = vector_store
 
-        self.provider = GoogleProvider(api_key=settings.gemini_api_key)
+        self.provider = GoogleProvider(client=self._create_genai_client())
         self.model = GoogleModel(
             model_name=settings.gemini_model, provider=self.provider
         )
@@ -30,6 +32,24 @@ class RAGService:
             system_prompt=self._get_system_prompt(),
             max_concurrency=settings.concurrency,
         )
+
+    def _create_genai_client(self) -> genai.Client:
+        """
+        Create a Gemini client with a per-request timeout and automatic retries
+        (exponential backoff with jitter) on transient errors: 408, 429 and 5xx.
+
+        Returns:
+            Configured google-genai Client
+        """
+        http_options = types.HttpOptions(
+            timeout=int(settings.gemini_timeout_seconds * 1000),  # milliseconds
+            retry_options=types.HttpRetryOptions(
+                attempts=settings.gemini_max_attempts,
+                initial_delay=settings.gemini_retry_initial_delay,
+                max_delay=settings.gemini_retry_max_delay,
+            ),
+        )
+        return genai.Client(api_key=settings.gemini_api_key, http_options=http_options)
 
     def _get_system_prompt(self) -> str:
         """
@@ -91,7 +111,7 @@ class RAGService:
 
         if not search_results["documents"] or not search_results["documents"][0]:
             return RAGResponse(
-                answer="I don't have any documents to answer your question. Please upload some PDF documents first.",
+                answer="I don't have any documents to answer your question. Please upload some PDF, TXT documents first.",
                 sources=[],
                 confidence="low",
             )

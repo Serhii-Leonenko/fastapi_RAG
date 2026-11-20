@@ -32,6 +32,8 @@ class QueryRequest(BaseModel):
 
 class RAGResponse(BaseModel):
     answer: str = Field(description="The generated answer based on the context")
-    sources: list[dict[str, Any]] = Field(
-        default_factory=list, description="Source documents used to generate the answer"
+    sources: list[dict[str, str]] = Field(
+        default_factory=list,
+        description="Source documents used to generate the answer",
+        examples=[{"filename": "document1.pdf"}]
     )

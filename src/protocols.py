@@ -1,6 +1,6 @@
 from typing import Protocol, Any
 
-from dtos import PDFResult
+from dtos import FileResult
 
 
 class ChunkerProtocol(Protocol):
@@ -8,11 +8,11 @@ class ChunkerProtocol(Protocol):
         pass
 
 
-class PDFProcessorProtocol(Protocol):
+class FileProcessorProtocol(Protocol):
     def save_uploaded_file(self, content: bytes, filename: str) -> str:
         pass
 
-    def process_pdf(self, pdf_path: str, filename: str) -> PDFResult:
+    def process_file(self, file_path: str, filename: str) -> FileResult:
         pass
 
     def delete_file(self, file_path: str) -> None:
@@ -20,7 +20,7 @@ class PDFProcessorProtocol(Protocol):
 
 
 class VectorStoreProtocol(Protocol):
-    def add_documents(self, pdf_result: PDFResult) -> None:
+    def add_documents(self, file_result: FileResult) -> None:
         pass
 
     def search(self, query: str, top_k: int = None) -> dict[str, Any]:

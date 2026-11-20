@@ -1,26 +1,36 @@
+from pathlib import Path
 from typing import Annotated, Dict
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from protocols import PDFProcessorProtocol, RAGServiceProtocol, VectorStoreProtocol
+from protocols import FileProcessorProtocol, RAGServiceProtocol, VectorStoreProtocol
 from schemas import QueryRequest, RAGResponse, StatsResponse, UploadResponse
 from src.config import settings
-from src.dependencies import get_pdf_processor, get_rag_service, get_vector_store
+from src.dependencies import get_file_processors, get_rag_service, get_vector_store
 
 router = APIRouter()
 
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_pdf(
-    pdf_processor: Annotated[PDFProcessorProtocol, Depends(get_pdf_processor)],
+async def upload_file(
+    file_processors: Annotated[
+        dict[str, FileProcessorProtocol], Depends(get_file_processors)
+    ],
     vector_store: Annotated[VectorStoreProtocol, Depends(get_vector_store)],
-    file: Annotated[UploadFile, File(description="PDF file to upload")],
+    file: Annotated[UploadFile, File(description="PDF or TXT file to upload")],
 ) -> UploadResponse:
     """
-    Upload a PDF file and add it to the vector store.
+    Upload a supported file (PDF, TXT) and add it to the vector store.
     """
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    extension = Path(file.filename or "").suffix.lower()
+    file_processor = file_processors.get(extension)
+    if file_processor is None:
+        supported = ", ".join(sorted(file_processors))
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Supported types: {supported}",
+        )
 
     content = await file.read()
     if len(content) > settings.max_upload_size:
@@ -30,20 +40,20 @@ async def upload_pdf(
         )
 
     try:
-        file_path = pdf_processor.save_uploaded_file(content, file.filename)
-        pdf_result = pdf_processor.process_pdf(file_path, file.filename)
+        file_path = file_processor.save_uploaded_file(content, file.filename)
+        file_result = file_processor.process_file(file_path, file.filename)
 
-        vector_store.add_documents(pdf_result=pdf_result)
+        vector_store.add_documents(file_result=file_result)
         total_docs = vector_store.count_documents()
 
         return UploadResponse(
-            message="PDF uploaded and processed successfully",
+            message="File uploaded and processed successfully",
             filename=file.filename,
             total_documents=total_docs,
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
 
 
 @router.post("/query", response_model=RAGResponse)
@@ -89,14 +99,18 @@ async def get_stats(
 async def delete_document(
     filename: str,
     vector_store: Annotated[VectorStoreProtocol, Depends(get_vector_store)],
-    pdf_processor: Annotated[PDFProcessorProtocol, Depends(get_pdf_processor)],
+    file_processors: Annotated[
+        dict[str, FileProcessorProtocol], Depends(get_file_processors)
+    ],
 ) -> dict[str, str]:
     """
-    Delete a document from the vector store and delete the PDF file from the upload directory.
+    Delete a document from the vector store and delete the file from the upload directory.
     """
     try:
         vector_store.delete_by_filename(filename)
-        pdf_processor.delete_file(filename)
+        file_processor = file_processors.get(Path(filename).suffix.lower())
+        if file_processor is not None:
+            file_processor.delete_file(filename)
 
         return {"message": f"Document '{filename}' deleted successfully"}
 

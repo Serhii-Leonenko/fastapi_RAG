@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     # Google Gemini API Settings
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
+    gemini_timeout_seconds: float = 20.0  # per HTTP request to Gemini
+    gemini_max_attempts: int = 3  # total attempts, including the first one
+    gemini_retry_initial_delay: float = 1.0  # seconds, grows exponentially
+    gemini_retry_max_delay: float = 10.0  # seconds, cap for backoff delay
 
     # ChromaDB Settings
     chroma_persist_directory: str = "./chroma_db"

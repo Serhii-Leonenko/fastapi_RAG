@@ -1,10 +1,13 @@
 from fastapi import Request
 
-from protocols import PDFProcessorProtocol, VectorStoreProtocol, RAGServiceProtocol
+from protocols import FileProcessorProtocol, VectorStoreProtocol, RAGServiceProtocol
 
 
-def get_pdf_processor(request: Request) -> PDFProcessorProtocol:
-    return request.app.state.pdf_processor
+def get_file_processors(request: Request) -> dict[str, FileProcessorProtocol]:
+    """
+    Return the registry of file processors keyed by lowercase file extension (e.g. ".pdf").
+    """
+    return request.app.state.file_processors
 
 
 def get_vector_store(request: Request) -> VectorStoreProtocol:
@@ -13,4 +16,3 @@ def get_vector_store(request: Request) -> VectorStoreProtocol:
 
 def get_rag_service(request: Request) -> RAGServiceProtocol:
     return request.app.state.rag_service
-

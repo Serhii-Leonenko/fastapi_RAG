@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 
-from dtos import PDFResult
+from dtos import FileResult
 from src.config import settings
 
 
@@ -24,21 +24,21 @@ class VectorStore:
         """Create directory if it doesn't exist."""
         os.makedirs(settings.chroma_persist_directory, exist_ok=True)
 
-    def add_documents(self, pdf_result: PDFResult) -> None:
+    def add_documents(self, file_result: FileResult) -> None:
         """
         Add documents to the vector store.
 
         Args:
-            pdf_result: PDFResult object containing filename, chunks
+            file_result: FileResult object containing filename, chunks
         """
         ids = []
         metadatas = []
-        for i in range(len(pdf_result.chunks)):
-            ids.append(f"{pdf_result.filename}-{i}")
-            metadatas.append({"filename": pdf_result.filename, "chunk_index": i})
+        for i in range(len(file_result.chunks)):
+            ids.append(f"{file_result.filename}-{i}")
+            metadatas.append({"filename": file_result.filename, "chunk_index": i})
 
         self.collection.add(
-            ids=ids, metadatas=metadatas, documents=pdf_result.chunks
+            ids=ids, metadatas=metadatas, documents=file_result.chunks
         )
 
     def search(self, query: str, top_k: int = None) -> Dict[str, Any]:

@@ -35,7 +35,7 @@ fastapi_rag/
 │   ├── schemas.py           # Pydantic models for requests/responses
 │   ├── dtos.py              # Data transfer objects
 │   ├── protocols.py         # Protocol definitions (interfaces)
-│   ├── pdf_processor.py     # PDF processing logic
+│   ├── file_processors.py   # File processing logic (PDF, TXT)
 │   ├── chunker.py           # Chunking strategies (sentence, recursive, semantic)
 │   ├── vector_store.py      # ChromaDB vector store implementation
 │   ├── rag_service.py       # RAG service with Google Gemini

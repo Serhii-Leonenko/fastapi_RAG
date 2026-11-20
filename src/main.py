@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from src.chunker import create_chunker
 from src.config import settings
-from src.pdf_processor import PDFProcessor
+from src.file_processors import PDFFileProcessor, TXTFileProcessor
 from src.rag_service import RAGService
 from src.routes import router
 from src.vector_store import VectorStore
@@ -21,7 +21,11 @@ async def lifespan(app: FastAPI):
     print(f"ChromaDB persist directory: {settings.chroma_persist_directory}")
 
     print("Initializing services...")
-    app.state.pdf_processor = PDFProcessor(chunker=create_chunker())
+    chunker = create_chunker()
+    app.state.file_processors = {
+        ".pdf": PDFFileProcessor(chunker=chunker),
+        ".txt": TXTFileProcessor(chunker=chunker),
+    }
     app.state.vector_store = VectorStore()
     app.state.rag_service = RAGService(vector_store=app.state.vector_store)
     print("Services initialized and stored in app.state")
