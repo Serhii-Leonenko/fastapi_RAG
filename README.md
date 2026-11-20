@@ -1,12 +1,12 @@
 # FastAPI RAG Application
 
-Retrieval-Augmented Generation (RAG) system built with FastAPI, ChromaDB, and Mistral AI. This application allows you to upload PDF documents, store them in a vector database, and query them using natural language.
+Retrieval-Augmented Generation (RAG) system built with FastAPI, ChromaDB, and Google Gemini. This application allows you to upload PDF documents, store them in a vector database, and query them using natural language.
 
 ## Features
 
 - 📄 **PDF Processing**: Upload and process PDF documents with automatic text extraction and chunking
 - 🔍 **Vector Search**: Efficient semantic search using ChromaDB and sentence transformers
-- 🤖 **AI-Powered Answers**: Get intelligent answers to your questions using Mistral AI
+- 🤖 **AI-Powered Answers**: Get intelligent answers to your questions using Google Gemini (free tier)
 - 📊 **Document Management**: Track, manage, and delete uploaded documents
 - 🔄 **Real-time Processing**: Asynchronous processing for optimal performance
 - 📈 **Observability**: Integrated with Logfire for monitoring and debugging
@@ -17,7 +17,7 @@ Retrieval-Augmented Generation (RAG) system built with FastAPI, ChromaDB, and Mi
 - **Framework**: FastAPI 0.129+
 - **Python**: 3.13+
 - **Vector Database**: ChromaDB 1.5+
-- **AI Model**: Mistral AI (via Pydantic AI)
+- **AI Model**: Google Gemini `gemini-2.5-flash` (via Pydantic AI)
 - **Embeddings**: Sentence Transformers 5.2+
 - **PDF Processing**: PyPDF 6.7+
 - **Monitoring**: Logfire 4.23+
@@ -36,10 +36,13 @@ fastapi_rag/
 │   ├── dtos.py              # Data transfer objects
 │   ├── protocols.py         # Protocol definitions (interfaces)
 │   ├── pdf_processor.py     # PDF processing logic
+│   ├── chunker.py           # Chunking strategies (sentence, recursive, semantic)
 │   ├── vector_store.py      # ChromaDB vector store implementation
-│   ├── rag_service.py       # RAG service with Mistral AI
+│   ├── rag_service.py       # RAG service with Google Gemini
 │   ├── chroma_db/           # ChromaDB persistence directory
 │   └── uploads/             # Uploaded PDF files
+├── scripts/
+│   └── generate_sample_pdfs.py  # Generates the sample PDFs
 ├── test_pdf_docs/           # Sample PDF documents
 ├── pyproject.toml           # Project dependencies
 ├── uv.lock                  # Lock file for dependencies
@@ -80,9 +83,9 @@ fastapi_rag/
    APP_VERSION=0.1.0
    DEBUG=False
    
-   # Mistral API Settings
-   MISTRAL_API_KEY=your_mistral_api_key_here
-   MISTRAL_MODEL=mistral-small-latest
+   # Google Gemini API Settings
+   GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_MODEL=gemini-2.5-flash
    
    # ChromaDB Settings
    CHROMA_PERSIST_DIRECTORY=./chroma_db
@@ -101,7 +104,7 @@ fastapi_rag/
    ```
 
 4. **Get API Keys**:
-   - **Mistral API Key**: Sign up at [Mistral AI](https://console.mistral.ai/)
+   - **Gemini API Key**: Get a free key at [Google AI Studio](https://aistudio.google.com/apikey)
    - **Logfire Token** (optional): Sign up at [Logfire](https://logfire.pydantic.dev/)
 
 ## Usage
@@ -121,6 +124,24 @@ uvicorn src.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 The API will be available at `http://127.0.0.1:8000`
+
+### Sample Documents
+
+Generate three sample PDFs into `test_pdf_docs/`:
+
+```bash
+uv run python scripts/generate_sample_pdfs.py
+```
+
+All content is fictional, so correct answers can only come from the documents and not from the model's own knowledge:
+
+| File | Content | Example questions |
+|------|---------|-------------------|
+| `quillfeather_employee_handbook.pdf` | Company policies: remote work, leave, expenses, security, on-call | How many vacation days do I get after 6 years? What is the hotel limit per night? How fast must a lost laptop be reported? |
+| `aurora_x2_espresso_manual.pdf` | Espresso machine manual: specs, brewing, maintenance, error codes, warranty | What does error E04 mean? How often should I descale? How do I get a 5-year warranty? |
+| `parcelwise_incident_postmortem.pdf` | Outage postmortem: timeline, root cause, action items | What was the root cause of the outage? Who owns the connection pool metrics action item? How many orders were lost? |
+
+Questions the documents cannot answer (for example "What is the CEO's name?") are useful for checking that the model says it doesn't know.
 
 ### API Documentation
 

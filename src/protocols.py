@@ -3,6 +3,11 @@ from typing import Protocol, Any
 from dtos import PDFResult
 
 
+class ChunkerProtocol(Protocol):
+    def split(self, text: str) -> list[str]:
+        pass
+
+
 class PDFProcessorProtocol(Protocol):
     def save_uploaded_file(self, content: bytes, filename: str) -> str:
         pass

@@ -3,16 +3,6 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
-class QueryRequest(BaseModel):
-    question: str = Field(description="The question to ask")
-    top_k: int | None = Field(
-        default=None,
-        description="Number of documents to retrieve (optional)",
-        ge=1,
-        le=20,
-    )
-
-
 class UploadResponse(BaseModel):
     message: str
     filename: str
@@ -28,6 +18,16 @@ class StatsResponse(BaseModel):
     total_documents: int
     total_chunks: int
     unique_files: list[str]
+
+
+class QueryRequest(BaseModel):
+    question: str = Field(description="The question to ask")
+    top_k: int | None = Field(
+        default=None,
+        description="Number of documents to retrieve (optional)",
+        ge=1,
+        le=20,
+    )
 
 
 class RAGResponse(BaseModel):

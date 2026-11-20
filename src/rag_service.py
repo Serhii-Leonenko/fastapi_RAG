@@ -2,8 +2,8 @@ from typing import Any
 
 import logfire
 from pydantic_ai import Agent
-from pydantic_ai.models.mistral import MistralModel
-from pydantic_ai.providers.mistral import MistralProvider
+from pydantic_ai.models.google import GoogleModel
+from pydantic_ai.providers.google import GoogleProvider
 
 from protocols import VectorStoreProtocol
 from schemas import RAGResponse
@@ -11,14 +11,14 @@ from src.config import settings
 
 
 class RAGService:
-    """Handles RAG operations using Pydantic AI and Mistral."""
+    """Handles RAG operations using Pydantic AI and Google Gemini."""
 
     def __init__(self, vector_store: VectorStoreProtocol):
         self.vector_store = vector_store
 
-        self.provider = MistralProvider(api_key=settings.mistral_api_key)
-        self.model = MistralModel(
-            model_name=settings.mistral_model, provider=self.provider
+        self.provider = GoogleProvider(api_key=settings.gemini_api_key)
+        self.model = GoogleModel(
+            model_name=settings.gemini_model, provider=self.provider
         )
 
         logfire.configure(token=settings.logfire_token)

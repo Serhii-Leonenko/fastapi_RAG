@@ -1,16 +1,17 @@
 import os
 import uuid
-import re
 from pathlib import Path
 
 from pypdf import PdfReader
 
 from dtos import PDFResult
+from protocols import ChunkerProtocol
 from src.config import settings
 
 
 class PDFProcessor:
-    def __init__(self):
+    def __init__(self, chunker: ChunkerProtocol):
+        self.chunker = chunker
         self._create_directory(settings.upload_dir)
 
     def _create_directory(self, directory_path: str) -> None:
@@ -49,23 +50,6 @@ class PDFProcessor:
         except Exception as e:
             raise Exception(f"Error reading PDF: {str(e)}")
 
-    def _split_into_sentences(self, text: str) -> list[str]:
-        """
-        Split text into sentences.
-
-        Args:
-            text: Text to split
-
-        Returns:
-            List of sentences
-        """
-        sentence_pattern = r"(?<=[.!?])\s+(?=[A-Z])"
-        sentences = re.split(sentence_pattern, text)
-
-        sentences = [s.strip() for s in sentences if s.strip()]
-
-        return sentences
-
     def process_pdf(self, pdf_path: str, filename: str) -> PDFResult:
         """
         Process a PDF file: extract text and create chunks.
@@ -75,16 +59,16 @@ class PDFProcessor:
             filename: Original filename
 
         Returns:
-            PDFResult containing chunks, metadatas, and ids
+            PDFResult containing filename and chunks
         """
         text = self.extract_text_from_pdf(pdf_path)
 
         if not text:
             raise ValueError("No text could be extracted from the PDF")
 
-        sentences = self._split_into_sentences(text)
+        chunks = self.chunker.split(text)
 
-        return PDFResult(filename=filename, sentences=sentences)
+        return PDFResult(filename=filename, chunks=chunks)
 
     def save_uploaded_file(self, file_content: bytes, filename: str) -> str:
         """

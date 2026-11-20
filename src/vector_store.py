@@ -29,16 +29,16 @@ class VectorStore:
         Add documents to the vector store.
 
         Args:
-            pdf_result: PDFResult object containing filename, sentences
+            pdf_result: PDFResult object containing filename, chunks
         """
         ids = []
         metadatas = []
-        for i, sentence in enumerate(pdf_result.sentences):
+        for i in range(len(pdf_result.chunks)):
             ids.append(f"{pdf_result.filename}-{i}")
             metadatas.append({"filename": pdf_result.filename, "chunk_index": i})
 
         self.collection.add(
-            ids=ids, metadatas=metadatas, documents=pdf_result.sentences
+            ids=ids, metadatas=metadatas, documents=pdf_result.chunks
         )
 
     def search(self, query: str, top_k: int = None) -> Dict[str, Any]:

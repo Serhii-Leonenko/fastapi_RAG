@@ -40,7 +40,6 @@ src/.env
 # Application specific
 chroma_db/
 uploads/
-*.pdf
 
 # Logs
 *.log
